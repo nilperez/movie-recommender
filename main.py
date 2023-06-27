@@ -16,7 +16,7 @@ df[list_columns] = df[list_columns].applymap(lambda x: list(ast.literal_eval(x))
 
 # Preparar entorno para la recomendación
 # Combinar las columnas "overview", "genres", "cast" y "director" en una sola columna
-df['combined'] = df['overview'] + ' ' + df['genres'].apply(lambda x: ' '.join(x)) + ' ' + df['cast'].apply(lambda x: ' '.join(x)) + ' ' + df['director']
+df['combined'] = df['overview'] + ' ' + df['genres'].apply(lambda x: ' '.join(x))
 
 # Crear una instancia de TfidfVectorizer para vectorizar el texto combinado
 tfidf = TfidfVectorizer(stop_words='english', ngram_range=(1, 2))
