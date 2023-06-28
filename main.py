@@ -1,8 +1,7 @@
 import pandas as pd
 import ast
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.metrics.pairwise import linear_kernel
 
@@ -10,96 +9,6 @@ app = FastAPI()
 
 # Leer el archivo CSV y crear el DataFrame 
 df = pd.read_csv('movies_credits_limpio.csv', parse_dates=['release_date'])
-
-list_columns = ['genres', 'production_companies', 'production_countries', 'spoken_languages', 'cast']
-df[list_columns] = df[list_columns].applymap(lambda x: list(ast.literal_eval(x)))
-
-# Preparar entorno para la recomendación
-# Combinar las columnas "overview", "genres", "cast" y "director" en una sola columna
-df['combined'] = df['overview'] + ' ' + df['genres'].apply(lambda x: ' '.join(x))
-
-# Crear una instancia de TfidfVectorizer para vectorizar el texto combinado
-tfidf = TfidfVectorizer(stop_words='english', ngram_range=(1, 2))
-
-# Aplicar TF-IDF al texto combinado
-tfidf_matrix = tfidf.fit_transform(df['combined'])
-
-# Menú de enlaces a cada endpoint
-@app.get('/', response_class=HTMLResponse)
-def menu():
-    enlaces = [
-        {
-            'endpoint': '/cantidad_filmaciones_mes/enero',
-            'nombre': 'Cantidad de Filmaciones por Mes',
-            'descripcion': {
-                'en': 'Function that returns the number of movies historically released in the specified month.',
-                'es': 'Función que retorna la cantidad de películas que se estrenaron históricamente en el mes indicado.'
-            }
-        },
-        {
-            'endpoint': '/cantidad_filmaciones_dia/lunes',
-            'nombre': 'Cantidad de Filmaciones por Día',
-            'descripcion': {
-                'en': 'Function that returns the number of movies historically released on the specified day.',
-                'es': 'Función que retorna la cantidad de películas que se estrenaron históricamente en el día indicado.'
-            }
-        },
-        {
-            'endpoint': '/score_titulo/Titanic',
-            'nombre': 'Score de Título',
-            'descripcion': {
-                'en': 'Function that returns the release year and score of the specified movie.',
-                'es': 'Función que retorna año de estreno y score de la filmación indicada.'
-            }
-        },
-        {
-            'endpoint': '/votos_titulo/Titanic',
-            'nombre': 'Votos de Título',
-            'descripcion': {
-                'en': 'Function that returns the release year, number of votes, and average rating of the specified movie, only if it has more than 2000 ratings.',
-                'es': 'Función que retorna año de estreno, cantidad de votos y valor promedio de las votaciones de la filmación indicada, solo en caso que haya tenido más de 2000 valoraciones.'
-            }
-        },
-        {
-            'endpoint': '/get_actor/Leonardo DiCaprio',
-            'nombre': 'Información de Actor',
-            'descripcion': {
-                'en': 'Function that returns the number of movies the actor has participated in, the success measured through return, and the average return.',
-                'es': 'Función que retorna la cantidad de películas en las que ha participado el actor, el éxito medido a través del retorno y el promedio de retorno.'
-            }
-        },
-        {
-            'endpoint': '/get_director/James Cameron',
-            'nombre': 'Información de Director',
-            'descripcion': {
-                'en': 'Function that returns the success measured through return of the director. It also returns the name of each movie with release date, individual return, budget, and revenue.',
-                'es': 'Función que retorna el éxito medido a través retorno del director. Además, devuelve el nombre de cada película con fecha de lanzamiento, retorno individual, costo y ganancia.'
-            }
-        },
-        {
-            'endpoint': '/recomendacion/Titanic',
-            'nombre': 'Recomendación',
-            'descripcion': {
-                'en': 'A function that returns a list of 5 movies similar to the one entered.',
-                'es': 'Función que retorna una lista de 5 películas similares a la ingresada.'
-            }
-        }
-    ]
-
-    menu_html = '<h1>Movie recommender API</h1>'
-    menu_html += '<ul>'
-    for enlace in enlaces:
-        menu_html += f'<li><a href="{enlace["endpoint"]}">{enlace["nombre"]}</a>'
-        if 'descripcion' in enlace:
-            menu_html += f'<br><span>{enlace["descripcion"]["en"]}</span><br><span style="font-size: 12px;">{enlace["descripcion"]["es"]}</span>'
-        menu_html += '</li>'
-    menu_html += '</ul>'
-
-    menu_html += '<p style="font-size: 14px;"><strong>Note:</strong> month and day should be entered in Spanish.</p>'
-    menu_html += '<p style="font-size: 12px;"><strong>Nota:</strong> mes y día se deben ingresar en español.</p>'
-
-    return menu_html
-
 
 # Endpoint para obtener la cantidad de filmaciones por mes
 @app.get('/cantidad_filmaciones_mes/{mes}')
@@ -283,22 +192,43 @@ def get_director(nombre_director: str):
     
     return respuesta
 
+# Preparar data para la recomendación
+
+# Seleccionar las columnas relevantes para la matriz de términos
+df1 = df[['genres', 'overview', 'popularity', 'title', 'vote_average', 'release_year', 'cast', 'director']]
+
+# Convertir las columnas 'genres' y 'cast' en listas de Python
+list_columns = ['genres', 'cast']
+df1.loc[:, list_columns] = df1.loc[:, list_columns].apply(lambda x: x.apply(ast.literal_eval).apply(tuple))
+
+# Crear una instancia del vectorizador
+vectorizer = CountVectorizer()
+
+# Concatenar las columnas 'overview', 'genres', 'cast' y 'director' en un solo texto
+textos_concatenados = df1['overview'] + ' ' + df1['genres'].apply(lambda x: ' '.join(x)) + ' ' + df1['cast'].apply(lambda x: ' '.join(x)) + ' ' + df1['director']
+
+# Crear la matriz de términos
+terminos_mat = vectorizer.fit_transform(textos_concatenados)
+
 @app.get("/recomendacion/{titulo}")
 def recomendacioin(titulo: str):
-    # Obtener los índices de todas las películas con el título dado
-    indices = df[df['title'] == titulo].index
+    indices = df1[df1['title'] == titulo].index
 
-    # Verificar si hay películas duplicadas con el mismo título
+    # Verificar si hay múltiples películas con el mismo título
     if len(indices) > 1:
-        # Seleccionar la película con el mayor vote_average
-        indice = df.loc[indices, 'vote_average'].idxmax()
-    else:
-        # Tomar el primer índice encontrado
-        indice = indices[0] if len(indices) > 0 else None
 
-    if indice is not None:
-        # Calcular la matriz de similitud del coseno
-        similitud_cos = linear_kernel(tfidf_matrix[indice], tfidf_matrix).flatten()
+        # Se encontraron múltiples películas con el mismo título
+        return {"error": f"Se encontraron múltiples películas con el título '{titulo}'."}
+
+    elif len(indices) == 1:
+        # Seleccionar la película con el mayor vote_average
+        indice = df1.loc[indices, 'vote_average'].idxmax()
+
+        # Obtener el vector de características de la película seleccionada
+        vector_pelicula = terminos_mat[indice]
+
+        # Calcular la similitud del coseno entre la película seleccionada y todas las demás películas
+        similitud_cos = cosine_similarity(vector_pelicula, terminos_mat)[0]
 
         # Obtener las puntuaciones de similitud para todas las películas
         scores_similares = list(enumerate(similitud_cos))
@@ -320,11 +250,5 @@ def recomendacioin(titulo: str):
         # Retornar la respuesta
         return respuesta
     else:
+        # No se encontró ninguna película con el título dado
         return {"error": f"No se encontró ninguna película con el título '{titulo}'."}
-
-
-
-
-
-
-
