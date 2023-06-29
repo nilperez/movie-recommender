@@ -136,9 +136,13 @@ def get_actor(nombre_actor: str):
 # Endpoint para obtener información de un director
 @app.get('/get_director/{nombre_director}')
 def get_director(nombre_director: str):
-    # Filtrar las películas dirigidas por el director
-    peliculas_director = df[df['director'] == nombre_director]
-    # Verificar si se encontraron películas para el director especificado
+    # Separar el nombre y apellido del actor
+    nombre, apellido = nombre_director.split(" ", 1) if " " in nombre_director else (nombre_director, "")
+    # Verificar si se proporcionó solo el nombre sin apellido
+    if apellido == "":
+        return {'error': "Debe proporcionar el nombre y el apellido del director"}
+    # Filtrar las películas en las que ha participado el actor
+    peliculas_director = df[df['cast'].apply(lambda x: nombre.lower() in x.lower() and apellido.lower() in x.lower())]
     if peliculas_director.empty:
         return {'error': f"No se encontraron películas dirigidas por '{nombre_director}'"}
     # Obtener los datos de interés de cada película
@@ -195,7 +199,7 @@ def recomendacion(titulo: str):
     # Crear la matriz de términos
     terminos_mat = vectorizer.fit_transform(textos_concatenados)
    
-    indices = df1[df1['title'] == titulo].index
+    indices = df1[df1['title'].str.lower() == titulo.lower()].index
     # Verificar si hay múltiples películas con el mismo título
     if len(indices) > 1:
         # Se encontraron múltiples películas con el mismo título
