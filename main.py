@@ -180,7 +180,7 @@ def clean_text(text):
     return text_cleaned
 
 @app.get("/recomendacion/{titulo}")
-def recomendacioin(titulo: str):
+def recomendacion(titulo: str):
     # Seleccionar las columnas relevantes para la matriz de términos
     df1 = df[['genres', 'overview', 'popularity', 'title', 'vote_average', 'release_year', 'cast', 'director']]
     # Convertir las columnas 'genres' y 'cast' en listas de Python
@@ -189,7 +189,9 @@ def recomendacioin(titulo: str):
     # Crear una instancia del vectorizador
     vectorizer = CountVectorizer()
     # Concatenar las columnas 'overview', 'genres', 'cast' y 'director' en un solo texto
-    textos_concatenados = df1['overview'] + ' ' + df1['genres'].apply(lambda x: ' '.join(x)) + ' ' + df1['cast'].apply(lambda x: ' '.join(x)) + ' ' + df1['director']
+    textos_concatenados = df1['overview'].apply(clean_text) + ' ' + df1['genres'].apply(lambda x: ' '.join(''.join(name.split()) for name in x)) + ' ' + \
+        df1['cast'].apply(lambda x: ' '.join(''.join(name.split()) for name in x)) + ' ' + df1['director'].apply(lambda x: ''.join(x.split())) + ' ' + \
+        df1['popularity'].astype(str) + ' ' + df1['vote_average'].astype(str)
     # Crear la matriz de términos
     terminos_mat = vectorizer.fit_transform(textos_concatenados)
    
