@@ -3,7 +3,7 @@ import ast
 from fastapi import FastAPI
 import nltk
 from nltk.corpus import stopwords
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 app = FastAPI(title='PI01: MLOps - Recomendación de peliculas', description='by Nilda Pérez Otero')
@@ -196,15 +196,13 @@ def preparar_data():
     # Seleccionar las columnas relevantes para la matriz de términos
     df_rec = df[['genres', 'overview', 'popularity', 'title', 'vote_average', 'release_year', 'cast', 'director']]
     # Crear una instancia del vectorizador
-    #vectorizer = CountVectorizer()
+    vectorizer = CountVectorizer()
     # Concatenar las columnas 'overview', 'genres', 'cast' y 'director' en un solo texto
     textos_concatenados = df_rec['overview'].apply(limpiar_texto) + ' ' + df_rec['genres'].apply(lambda x: ' '.join(''.join(name.split()) for name in x)) + ' ' + \
         df_rec['cast'].apply(lambda x: ' '.join(''.join(name.split()) for name in x)) + ' ' + df_rec['director'].apply(lambda x: ''.join(x.split())) + ' ' + \
         df_rec['popularity'].astype(str) + ' ' + df_rec['vote_average'].astype(str)
-    # Crear una instancia de TfidfVectorizer para vectorizar el texto combinado
-    tfidf = TfidfVectorizer(stop_words='english', ngram_range=(1, 2))
     # Crear la matriz de términos
-    terminos_mat = tfidf.fit_transform(textos_concatenados)
+    terminos_mat = vectorizer.fit_transform(textos_concatenados)
     return df_rec, terminos_mat
 
 # Preparar datos para la recomendación
