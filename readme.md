@@ -77,6 +77,6 @@ El despliegue de la API se hizo mediante [Render](https://render.com/).
 
 - [Repositorio del proyecto en GitHub](https://github.com/nilperez/movie-recommender/)
 - [Documentación de la API](https://ml-ops-movie-recommender.onrender.com/docs)
-- [Video]()
+- [Video](https://www.youtube.com/watch?v=DFNU4UIt3ZU)
 
 Si tienes alguna pregunta adicional, no dudes en [contactarme](nilperez@gmail.com). ¡Gracias por tu interés en mi proyecto de Recomendación de Películas!
