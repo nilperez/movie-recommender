@@ -34,7 +34,7 @@ Otras transformaciones:
 + Se combinaron los dos _dataframes_ en un solo.
 
 ### Cargar
- El _dataframe_ combincado se guardó como `movies_credits_limpio.csv` para ser consumido en las próximas etapas.
+ El _dataframe_ combincado se guardó como [`movies_credits_limpio.csv`](https://github.com/nilperez/movie-recommender/blob/main/movies_credits_limpio.csv) para ser consumido en las próximas etapas.
 
 ## 2. Proceso de [EDA](<notebooks/PI01 EDA.ipynb>)
 
