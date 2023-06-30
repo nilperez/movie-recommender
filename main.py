@@ -3,14 +3,15 @@ import ast
 from fastapi import FastAPI
 import nltk
 from nltk.corpus import stopwords
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 app = FastAPI(title='PI01: MLOps - Recomendación de peliculas', description='by Nilda Pérez Otero')
 
 # Leer el archivo CSV y crear el DataFrame 
 df = pd.read_csv('movies_credits_limpio.csv', parse_dates=['release_date'])
-
+list_columns = ['genres', 'production_companies', 'production_countries', 'spoken_languages', 'cast']
+df[list_columns] = df[list_columns].applymap(lambda x: list(ast.literal_eval(x)))
 @app.get('/')
 async def read_root():
     return {'PI01: MLOps - Recomendación de películas. Ingresa en /docs para continuar.'}        
@@ -125,7 +126,7 @@ def get_actor(nombre_actor: str):
     if apellido == "":
         return {'error': "Debe proporcionar el nombre y el apellido del actor"}
     # Filtrar las películas en las que ha participado el actor
-    peliculas_actor = df[df['cast'].apply(lambda x: nombre.lower() in x.lower() and apellido.lower() in x.lower())]
+    peliculas_actor = df[df['cast'].apply(lambda x: any(nombre.lower() in actor.lower() and apellido.lower() in actor.lower() for actor in x))]
     if peliculas_actor.empty:
         # No se encontraron películas en las que el actor haya participado
         return {'error': f"No se encontraron películas en las que el actor '{nombre_actor}' haya participado"}
@@ -134,7 +135,10 @@ def get_actor(nombre_actor: str):
     retorno_total = round(peliculas_actor['return'].sum(), 2)
     retorno_promedio = round(peliculas_actor['return'].mean(), 2)
     # Crear el diccionario de salida
-    respuesta = {'actor': nombre_actor, 'cantidad_filmaciones': cantidad_filmaciones, 'retorno_total': retorno_total, 'retorno_promedio': retorno_promedio}
+    respuesta = {'actor': nombre_actor.title(), 
+                 'cantidad_filmaciones': cantidad_filmaciones, 
+                 'retorno_total': retorno_total, 
+                 'retorno_promedio': retorno_promedio}
     # Retornar la respuesta
     return respuesta
 
@@ -165,51 +169,54 @@ def get_director(nombre_director: str):
     retorno_total_director = round(peliculas_director['return'].sum(), 2)
     # Crear el diccionario de salida
     respuesta = {
-        'director': nombre_director,
+        'director': nombre_director.title(),
         'retorno_total_director': retorno_total_director,
         'peliculas': peliculas_info
     }
     return respuesta
 
-# Preparar data para la recomendación
 # Descargar las stopwords en inglés si no están disponibles
 nltk.download('stopwords')
+
 # Obtener las stopwords en inglés
 stop_words = set(stopwords.words('english'))
 stop_words.update(',',';','!','?','.','(',')','$','#','+',':','...',' ','')
 
 # Función para limpiar el texto
-def clean_text(text):
+def limpiar_texto(texto):
     # Tokenizar el texto en palabras individuales
-    tokens = text.split()
+    tokens = texto.split()
     # Eliminar las stopwords y los signos de puntuación
     tokens_cleaned = [token.lower() for token in tokens if token.lower() not in stop_words]
     # Unir las palabras limpias en un solo texto nuevamente
-    text_cleaned = ' '.join(tokens_cleaned)
-    return text_cleaned
+    texto_limpio = ' '.join(tokens_cleaned)
+    return texto_limpio
 
+def preparar_data():
+    # Seleccionar las columnas relevantes para la matriz de términos
+    df_rec = df[['genres', 'overview', 'popularity', 'title', 'vote_average', 'release_year', 'cast', 'director']]
+    # Crear una instancia del vectorizador
+    #vectorizer = CountVectorizer()
+    # Concatenar las columnas 'overview', 'genres', 'cast' y 'director' en un solo texto
+    textos_concatenados = df_rec['overview'].apply(limpiar_texto) + ' ' + df_rec['genres'].apply(lambda x: ' '.join(''.join(name.split()) for name in x)) + ' ' + \
+        df_rec['cast'].apply(lambda x: ' '.join(''.join(name.split()) for name in x)) + ' ' + df_rec['director'].apply(lambda x: ''.join(x.split())) + ' ' + \
+        df_rec['popularity'].astype(str) + ' ' + df_rec['vote_average'].astype(str)
+    # Crear una instancia de TfidfVectorizer para vectorizar el texto combinado
+    tfidf = TfidfVectorizer(stop_words='english', ngram_range=(1, 2))
+    # Crear la matriz de términos
+    terminos_mat = tfidf.fit_transform(textos_concatenados)
+    return df_rec, terminos_mat
+
+# Preparar datos para la recomendación
+df1, terminos_mat = preparar_data()
+
+# Decorador para el endpoint de recomendación
 @app.get("/recomendacion/{titulo}")
 def recomendacion(titulo: str):
-    # Seleccionar las columnas relevantes para la matriz de términos
-    df1 = df[['genres', 'overview', 'popularity', 'title', 'vote_average', 'release_year', 'cast', 'director']]
-    # Convertir las columnas 'genres' y 'cast' en listas de Python
-    list_columns = ['genres', 'cast']
-    df1.loc[:, list_columns] = df1.loc[:, list_columns].apply(lambda x: x.apply(ast.literal_eval).apply(tuple))
-    # Crear una instancia del vectorizador
-    vectorizer = CountVectorizer()
-    # Concatenar las columnas 'overview', 'genres', 'cast' y 'director' en un solo texto
-    textos_concatenados = df1['overview'].apply(clean_text) + ' ' + df1['genres'].apply(lambda x: ' '.join(''.join(name.split()) for name in x)) + ' ' + \
-        df1['cast'].apply(lambda x: ' '.join(''.join(name.split()) for name in x)) + ' ' + df1['director'].apply(lambda x: ''.join(x.split())) + ' ' + \
-        df1['popularity'].astype(str) + ' ' + df1['vote_average'].astype(str)
-    # Crear la matriz de términos
-    terminos_mat = vectorizer.fit_transform(textos_concatenados)
-   
     indices = df1[df1['title'].str.lower() == titulo.lower()].index
+
     # Verificar si hay múltiples películas con el mismo título
-    if len(indices) > 1:
-        # Se encontraron múltiples películas con el mismo título
-        return {"error": f"Se encontraron múltiples películas con el título '{titulo}'."}
-    elif len(indices) == 1:
+    if len(indices) >= 1:
         # Seleccionar la película con el mayor vote_average
         indice = indices[0]
         # Obtener el vector de características de la película seleccionada
@@ -233,3 +240,4 @@ def recomendacion(titulo: str):
     else:
         # No se encontró ninguna película con el título dado
         return {"error": f"No se encontró ninguna película con el título '{titulo}'."}
+    return recomendaciones
