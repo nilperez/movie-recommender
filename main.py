@@ -150,8 +150,8 @@ def get_director(nombre_director: str):
     # Verificar si se proporcionó solo el nombre sin apellido
     if apellido == "":
         return {'error': "Debe proporcionar el nombre y el apellido del director"}
-    # Filtrar las películas en las que ha participado el actor
-    peliculas_director = df[df['cast'].apply(lambda x: nombre.lower() in x.lower() and apellido.lower() in x.lower())]
+    # Filtrar las películas que ha dirigido el director
+    peliculas_director = df[df['director'].str.lower().str.contains(nombre) & df['director'].str.lower().str.contains(apellido)]
     if peliculas_director.empty:
         return {'error': f"No se encontraron películas dirigidas por '{nombre_director}'"}
     # Obtener los datos de interés de cada película

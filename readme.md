@@ -53,12 +53,11 @@ En esta etapa se hizo uso de las siguientes técnicas comunes del EDA:
 Se utilizaron técnicas de procesamiento de texto y similitud del coseno para recomendar 5 películas similares a la película ingresada por el usuario.
 A continuación, se explica cómo funciona la recomendación paso a paso:
 
-+ Se seleccionan las columnas del que contienen la información relevante para el sistema de recomendación.
-+ Se crea una  que se utilizará para convertir el texto de las columnas seleccionadas en una matriz de términos.
++ Se seleccionan las columnas del _dataframe_ que contienen la información relevante para el sistema de recomendación.
 + Las columnas seleccionadas se concatenan en un solo texto para cada película. 
 + Se utiliza instancia del objeto `CountVectorizer` de la biblioteca _scikit-learn_ en los textos concatenados para crear una matriz de términos.
-+ Para encontrar películas similares, se utiliza la similitud del coseno. Se calcula la similitud del coseno entre el vector de términos de la película ingrsada y el vector de términos de todas las demás películas en la matriz. Esto da como resultado un arreglo de similitudes.
-+ Finalmente, se seleccionan las 5 películas más similares de la lista ordenada de similitudes y se devuelve una lista con los títulos de éstas 5 películas.
++ Para encontrar películas similares, se utiliza la similitud del coseno entre el vector de términos de la película ingresada y el vector de términos de todas las demás películas en la matriz. Esto da como resultado un arreglo de similitudes.
++ Finalmente, se seleccionan las primeras 5 películas de la lista ordenada de similitudes y se devuelve una lista con los títulos de estas 5 películas.
 
 ## 4. Desarrollo API
 
