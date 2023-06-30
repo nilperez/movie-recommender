@@ -145,13 +145,21 @@ def get_actor(nombre_actor: str):
 # Endpoint para obtener información de un director
 @app.get('/get_director/{nombre_director}')
 def get_director(nombre_director: str):
-    # Separar el nombre y apellido del actor
+# Separar el nombre y apellido del actor
     nombre, apellido = nombre_director.split(" ", 1) if " " in nombre_director else (nombre_director, "")
     # Verificar si se proporcionó solo el nombre sin apellido
     if apellido == "":
         return {'error': "Debe proporcionar el nombre y el apellido del director"}
-    # Filtrar las películas que ha dirigido el director
-    peliculas_director = df[df['director'].str.lower().str.contains(nombre) & df['director'].str.lower().str.contains(apellido)]
+    else:
+        # Convertir el nombre y apellido a minúsculas
+        nombre = nombre.lower()
+        apellido = apellido.lower()
+
+    # Combinar el nombre y apellido en el formato "Nombre Apellido" para la búsqueda
+    nombre_completo = f"{nombre} {apellido}"
+
+    # Filtrar las películas dirigidas por el director
+    peliculas_director = df[df['director'].str.contains(nombre_completo, case=False)]
     if peliculas_director.empty:
         return {'error': f"No se encontraron películas dirigidas por '{nombre_director}'"}
     # Obtener los datos de interés de cada película
