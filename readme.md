@@ -48,7 +48,7 @@ En esta etapa se hizo uso de las siguientes técnicas comunes del EDA:
 + Análisis de distribuciones de variables
 + Matrices de correlación.
 
-## 3. Sistema de [recomendación de películas](<notebooks/PI01 ML.ipynb>)
+## 3. Sistema de recomendación de películas
 
 Se utilizaron técnicas de procesamiento de texto y similitud del coseno para recomendar 5 películas similares a la película ingresada por el usuario.
 A continuación, se explica cómo funciona la recomendación paso a paso:
@@ -58,6 +58,8 @@ A continuación, se explica cómo funciona la recomendación paso a paso:
 + Se utiliza instancia del objeto `CountVectorizer` de la biblioteca _scikit-learn_ en los textos concatenados para crear una matriz de términos.
 + Para encontrar películas similares, se utiliza la similitud del coseno entre el vector de términos de la película ingresada y el vector de términos de todas las demás películas en la matriz. Esto da como resultado un arreglo de similitudes.
 + Finalmente, se seleccionan las primeras 5 películas de la lista ordenada de similitudes y se devuelve una lista con los títulos de estas 5 películas.
+
+En el este [_notebook_](<notebooks/PI01 ML.ipynb>) hay dos alternativas a la implementada en la API, una usando _TfidfVectorizer_ y otra usando _k-nearest neighbors_ que no se pudieron implentar debido a la restriccion de 512 MB de RAM de la versión gratuita de RENDER.
 
 ## 4. Desarrollo API
 
