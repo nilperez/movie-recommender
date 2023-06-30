@@ -6,10 +6,15 @@ from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-app = FastAPI()
+app = FastAPI(title='PI01: MLOps - Recomendación de peliculas', description='by Nilda Pérez Otero')
 
 # Leer el archivo CSV y crear el DataFrame 
 df = pd.read_csv('movies_credits_limpio.csv', parse_dates=['release_date'])
+
+@app.get('/')
+async def read_root():
+    return {'PI01: MLOps - Recomendación de películas. Ingresa en /docs para continuar.'}        
+        
 
 # Endpoint para obtener la cantidad de filmaciones por mes
 @app.get('/cantidad_filmaciones_mes/{mes}')
