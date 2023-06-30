@@ -1,4 +1,4 @@
-![HenryLogo](src\logo.png)
+<p align=left><img src=src\logo.png width="35%">
 
 # **Proyecto Individual 1:** Machine Learning Operations (MLOps)
 ### by Nilda Pérez Otero
@@ -48,7 +48,7 @@ En esta etapa se hizo uso de las siguientes técnicas comunes del EDA:
 + Análisis de distribuciones de variables
 + Matrices de correlación.
 
-## 3. [Sistema de recomendación de películas]
+## 3. Sistema de [recomendación de películas](<notebooks/PI01 ML.ipynb>)
 
 Se utilizaron técnicas de procesamiento de texto y similitud del coseno para recomendar 5 películas similares a la película ingresada por el usuario.
 A continuación, se explica cómo funciona la recomendación paso a paso:
@@ -64,21 +64,20 @@ A continuación, se explica cómo funciona la recomendación paso a paso:
 
 Se disponibilizaron los datos usando el framework FastAPI. Las consultas disponibles son las siguientes:
 
-+ cantidad_filmaciones_mes(mes): Se ingresa un mes en idioma Español, devuelve la cantidad de películas que fueron estrenadas históricamente en el mes consultado.
-+ cantidad_filmaciones_dia(dia): Se ingresa un día en idioma Español. Devuelve la cantidad de películas que fueron estrenadas históricamente en el día consultado.
-+ score_titulo(titulo_de_la_filmación): Se ingresa el título de una filmación y da como respuesta el título, el año de estreno y el score.
-+ votos_titulo(titulo_de_la_filmación): Se ingresa el título de una filmación y si esta cuenta al menos con 2000 valoraciones, da como respuesta el título, la cantidad de votos y el valor promedio de las votaciones, caso contrario, da un mensaje avisando que no cumple esta condición.
-+ get_actor(nombre_actor): Se ingresa el nombre de un actor que se encuentre dentro del dataset y devuelve su éxito medido a través del retorno. Además devuelve la cantidad de películas que en las que ha participado y el promedio de retorno.
-+ get_director(nombre_director): Se ingresa el nombre de un director que se encuentre dentro del dataset debiendo devolver su éxito medido a través del retorno. Además devuenve el nombre de cada película que dirigió con la fecha de lanzamiento, retorno individual, costo y ganancia.
-+ recomendacion( titulo ): Se ingresa el nombre de una película y devuelve como resultado una lista con las 5 películas más similares.
-
++ [cantidad_filmaciones_mes(mes)](https://ml-ops-movie-recommender.onrender.com/docs#/default/cantidad_filmaciones_mes_cantidad_filmaciones_mes__mes__get): Se ingresa un mes en idioma Español, devuelve la cantidad de películas que fueron estrenadas históricamente en el mes consultado.
++ [cantidad_filmaciones_dia(dia)](https://ml-ops-movie-recommender.onrender.com/docs#/default/cantidad_filmaciones_dia_cantidad_filmaciones_dia__dia__get): Se ingresa un día en idioma Español. Devuelve la cantidad de películas que fueron estrenadas históricamente en el día consultado.
++ [score_titulo(titulo_de_la_filmación)](https://ml-ops-movie-recommender.onrender.com/docs#/default/score_titulo_score_titulo__titulo__get): Se ingresa el título de una filmación y da como respuesta el título, el año de estreno y el score.
++ [votos_titulo(titulo_de_la_filmación)](https://ml-ops-movie-recommender.onrender.com/docs#/default/votos_titulo_votos_titulo__titulo__get): Se ingresa el título de una filmación y si esta cuenta al menos con 2000 valoraciones, da como respuesta el título, la cantidad de votos y el valor promedio de las votaciones, caso contrario, da un mensaje avisando que no cumple esta condición.
++ [get_actor(nombre_actor)](https://ml-ops-movie-recommender.onrender.com/docs#/default/get_actor_get_actor__nombre_actor__get): Se ingresa el nombre de un actor que se encuentre dentro del dataset y devuelve su éxito medido a través del retorno. Además devuelve la cantidad de películas que en las que ha participado y el promedio de retorno.
++ [get_director(nombre_director)](https://ml-ops-movie-recommender.onrender.com/docs#/default/get_director_get_director__nombre_director__get): Se ingresa el nombre de un director que se encuentre dentro del dataset debiendo devolver su éxito medido a través del retorno. Además devuenve el nombre de cada película que dirigió con la fecha de lanzamiento, retorno individual, costo y ganancia.
++ [recomendacion(titulo)](https://ml-ops-movie-recommender.onrender.com/docs#/default/recomendacion_recomendacion__titulo__get): Se ingresa el nombre de una película y devuelve como resultado una lista con las 5 películas más similares.
 ## 5. Deployment
-El deslpiege de la API se hizo mediante [Render](https://render.com/).com.
+El despliegue de la API se hizo mediante [Render](https://render.com/).
 
 # Enlaces
 
-- [Repositorio del proyecto en GitHub](https://github.com/tu_usuario/proyecto-recomendacion-peliculas)
-- [Documentación de la API](https://documentacion-api.com)
+- [Repositorio del proyecto en GitHub](https://github.com/nilperez/movie-recommender/)
+- [Documentación de la API](https://ml-ops-movie-recommender.onrender.com/docs)
 - [Video]()
 
-Si tienes alguna pregunta adicional, no dudes en [contactarme](nilperez@gmail.com). ¡Gracias por tu interés en nuestro proyecto de Recomendación de Películas!
+Si tienes alguna pregunta adicional, no dudes en [contactarme](nilperez@gmail.com). ¡Gracias por tu interés en mi proyecto de Recomendación de Películas!
