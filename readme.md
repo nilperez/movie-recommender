@@ -14,11 +14,11 @@ En este proyecto se asume el rol de _Data Engineer_. Se partió de cero, con un 
 ETL (por las siglas en inglés de Extraer, Transformar y Cargar) es el proceso utilizado en la gestión de datos. Es un enfoque común para recopilar, transformar y cargar datos desde diferentes fuentes en un sistema de destino, como un almacén de datos o una base de datos.
 
 ### Extraer 
-Se consideraron los dos archivos `.csv` provistos: `movies_dataset.csv` y `credits.csv`
+Se consideraron los dos archivos `.csv` provistos: [`movies_dataset.csv` y `credits.csv`](https://drive.google.com/drive/folders/1hW0XAeLp07ka2b1dLNk1LP1Hej0H0t0i?usp=sharing)
 
 ### Transformar
 
-Se realizaron las transformaciones [solicitadas](https://github.com/HX-PRomero/PI_ML_OPS):
+Se realizaron las transformaciones [solicitadas](https://github.com/HX-PRomero/PI_ML_OPS#readme):
 + Se desanidaron los campos que tienen un diccionario o una lista como valores en cada fila.
 + Se rellenaron con **0** los valores nulos de los campos _revenue_ y _budget_.
 + Se eliminaron las filas con valores nulos en el campo release_date.
